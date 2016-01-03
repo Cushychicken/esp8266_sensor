@@ -4,7 +4,7 @@ function joinWifi(SSID, PASS)
     wifi.setmode(wifi.STATION)
     wifi.sta.config(SSID,PASS)
     ipaddr = wifi.sta.getip()
-    print("ESP8266 IP Addr: "..ipaddr)
+    return ipaddr
 end
 
 -- HTTP GET Request 
@@ -12,9 +12,11 @@ end
 function requestGet(HOST, PORT)
     conn=net.createConnection(net.TCP, false) 
     conn:on("receive", function(conn, pl) payload=pl end)
-    conn:connect(PORT,"10.0.1.8")
-    conn:send("GET / HTTP/1.1\r\nHost: www.nodemcu.com\r\n"
-        .."Connection: keep-alive\r\nAccept: */*\r\n\r\n")
+    conn:connect(PORT, HOST)
+    conn:send("GET / HTTP/1.1\r\n"..
+              "Host: "..HOST.."\r\n"..
+              "Connection: keep-alive\r\n"..
+              "Accept: */*\r\n\r\n")
     return payload
 end
 
@@ -22,23 +24,24 @@ end
 --      Working - 1/2/2016
 --      Need to verify post req text formatting is right
 function adcValPostReq()
-    local data = { adcVal = adc.read(0) }
-    request = "POST uri HTTP/1.1\r\n"..
-      "Host: example.com\r\n"..
-      "apiKey: e2sss3af-9ssd-43b0-bfdd-24a1dssssc46\r\n"..
-      "Cache-Control: no-cache\r\n"..
-      "Content-Type: application/x-www-form-urlencoded\r\n"..cjson.encode(data)
+    local data = { meas = adc.read(0) }
+    data = cjson.encode(data)
+    request = "POST /data HTTP/1.1\r\n"..
+              "Host: 10.0.1.8\r\n"..
+              "Cache-Control: no-cache\r\n"..
+              "Content-Type: application/x-www-form-urlencoded\r\n\r\n"..
+			  data
     return request
 end
 
 -- HTTP POST Request
---      Not working
---      Could be hardware issue (too much current draw)
---      Could be softwware issue (poor header format - see helper f'n)
+--      Working - 1/2/2016
+--      Earlier missed communications unclear source
+--      Not passing data value correctly - "None" on srvr
 function requestPost(HOST, PORT, data)
     conn=net.createConnection(net.TCP, 0)  
-    conn:on("receive", display) 
-    conn:connect(PORT, HOST)  
+    conn:on("receive", function(conn, pl) print(pl) end) 
+    conn:connect(PORT, HOST) 
     conn:on("connection",function(conn) conn:send(data) end)
 end
 
@@ -49,5 +52,5 @@ if wifi.sta.getip() == nil then
     joinWifi("Montucky", "KerivanReilly")
 end
 
-print(adcValBundle())
-tmr.alarm(0, 1000, 0, function() print(requestGet("10.0.1.8", 5000)) end)
+print(requestPost("10.0.1.8", 5000, adcValPostReq()))
+

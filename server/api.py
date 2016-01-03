@@ -7,8 +7,8 @@ api = Api(app)
 
 DATA = {
     'data1': {'meas': 123, 'time': '2016-01-02 11:28:09 -05:00'},
-	'data2': {'meas': 456, 'time': '2016-01-02 11:28:11 -05:00'},
-	'data3': {'meas': 789, 'time': '2016-01-02 11:28:13 -05:00'},
+    'data2': {'meas': 456, 'time': '2016-01-02 11:28:11 -05:00'},
+    'data3': {'meas': 789, 'time': '2016-01-02 11:28:13 -05:00'},
 }
 
 
@@ -17,7 +17,7 @@ def abort_if_data_doesnt_exist(data_id):
         abort(404, message="data {} doesn't exist".format(data_id))
 
 parser = reqparse.RequestParser()
-parser.add_argument('meas')
+parser.add_argument('meas', type=int)
 
 # data
 # shows a single data item and lets you delete a data item
@@ -46,11 +46,12 @@ class DataList(Resource):
 
     def post(self):
         args = parser.parse_args()
+        print args
         data_id = int(max(DATA.keys()).lstrip('data')) + 1
         data_id = 'data%i' % data_id
         time = arrow.now().format('YYYY-MM-DD HH:mm:ss ZZ') 
         DATA[data_id] = {'meas': args['meas'],
-						 'time': time}
+                         'time': time}
         return DATA[data_id], 201
 
 ##
