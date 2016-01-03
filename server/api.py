@@ -17,7 +17,7 @@ def abort_if_data_doesnt_exist(data_id):
         abort(404, message="data {} doesn't exist".format(data_id))
 
 parser = reqparse.RequestParser()
-parser.add_argument('meas', type=int)
+parser.add_argument('meas')
 
 # data
 # shows a single data item and lets you delete a data item

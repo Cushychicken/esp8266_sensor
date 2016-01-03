@@ -24,7 +24,8 @@ end
 --      Working - 1/2/2016
 --      Need to verify post req text formatting is right
 function adcValPostReq()
-    local data = { meas = adc.read(0) }
+    local data = {}
+    data.meas = "'"..adc.read(0).."'"
     data = cjson.encode(data)
     request = "POST /data HTTP/1.1\r\n"..
               "Host: 10.0.1.8\r\n"..
@@ -41,7 +42,7 @@ end
 function requestPost(HOST, PORT, data)
     conn=net.createConnection(net.TCP, 0)  
     conn:on("receive", function(conn, pl) print(pl) end) 
-    conn:connect(PORT, HOST) 
+    conn:connect(PORT, HOST)
     conn:on("connection",function(conn) conn:send(data) end)
 end
 
@@ -52,5 +53,7 @@ if wifi.sta.getip() == nil then
     joinWifi("Montucky", "KerivanReilly")
 end
 
-print(requestPost("10.0.1.8", 5000, adcValPostReq()))
+payload = adcValPostReq()
+print(payload)
+print(requestPost("10.0.1.8", 5000, payload))
 
