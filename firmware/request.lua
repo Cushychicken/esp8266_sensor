@@ -24,16 +24,18 @@ end
 --      Working - 1/2/2016
 --      Need to verify post req text formatting is right
 function adcValPostReq()
-    local data = {}
-    data.meas = "'"..adc.read(0).."'"
+    data = { meas=tostring(adc.read(0)) }
     data = cjson.encode(data)
     request = "POST /data HTTP/1.1\r\n"..
-              "Host: 10.0.1.8\r\n"..
-              "Cache-Control: no-cache\r\n"..
-              "Content-Type: application/x-www-form-urlencoded\r\n\r\n"..
+              "Host: 10.0.1.8:5000\r\n"..
+              "User-Agent: NodeMCU\r\n"..
+              "Accept: */*\r\n"..
+              "Content-Type: application/json\r\n"..
+              "Content-Length: "..string.len(data).."\r\n\r\n"..
 			  data
     return request
 end
+
 
 -- HTTP POST Request
 --      Working - 1/2/2016
@@ -41,7 +43,7 @@ end
 --      Not passing data value correctly - "None" on srvr
 function requestPost(HOST, PORT, data)
     conn=net.createConnection(net.TCP, 0)  
-    conn:on("receive", function(conn, pl) print(pl) end) 
+    conn:on("receive", function(conn, pl) payload=pl end) 
     conn:connect(PORT, HOST)
     conn:on("connection",function(conn) conn:send(data) end)
 end
@@ -53,7 +55,10 @@ if wifi.sta.getip() == nil then
     joinWifi("Montucky", "KerivanReilly")
 end
 
-payload = adcValPostReq()
-print(payload)
-print(requestPost("10.0.1.8", 5000, payload))
+tmr.alarm(1, 100, 1, function() tmr.wdclr() end)
+
+tmr.alarm(0, 1000, 1, function()
+    payload = adcValPostReq()
+    requestPost("10.0.1.8", 5000, payload)
+end)
 

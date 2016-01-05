@@ -17,7 +17,7 @@ def abort_if_data_doesnt_exist(data_id):
         abort(404, message="data {} doesn't exist".format(data_id))
 
 parser = reqparse.RequestParser()
-parser.add_argument('meas')
+parser.add_argument('meas', required=True)
 
 # data
 # shows a single data item and lets you delete a data item
@@ -42,13 +42,16 @@ class Data(Resource):
 # shows a list of all data, and lets you POST to add new meas
 class DataList(Resource):
     def get(self):
-        return DATA
+        if len(DATA) <= 100:
+            return DATA
+        else:
+            return DATA[-100:]
 
     def post(self):
         args = parser.parse_args()
-        print args
-        data_id = int(max(DATA.keys()).lstrip('data')) + 1
+        data_id = int(len(DATA)) + 1
         data_id = 'data%i' % data_id
+        print data_id, args
         time = arrow.now().format('YYYY-MM-DD HH:mm:ss ZZ') 
         DATA[data_id] = {'meas': args['meas'],
                          'time': time}
