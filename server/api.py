@@ -42,10 +42,10 @@ class Data(Resource):
 # shows a list of all data, and lets you POST to add new meas
 class DataList(Resource):
     def get(self):
-        if len(DATA) <= 100:
+        if len(DATA) <= 20:
             return DATA
         else:
-            return DATA[-100:]
+            return DATA[-20:]
 
     def post(self):
         args = parser.parse_args()

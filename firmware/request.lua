@@ -1,8 +1,12 @@
 -- Joins wifi address with SSID and PASSWORD 
 --      Working - 12/30/2015
 function joinWifi(SSID, PASS)
-    wifi.setmode(wifi.STATION)
+    wifi.setmode(wifi.STATIONAP)
     wifi.sta.config(SSID,PASS)
+--    cfg = {}
+--    cfg.ssid="esp_serve"
+--    cfg.pwd="development"
+--    wifi.ap.setup(cfg)
     ipaddr = wifi.sta.getip()
     return ipaddr
 end
@@ -56,7 +60,6 @@ if wifi.sta.getip() == nil then
 end
 
 tmr.alarm(1, 100, 1, function() tmr.wdclr() end)
-
 tmr.alarm(0, 1000, 1, function()
     payload = adcValPostReq()
     requestPost("10.0.1.8", 5000, payload)
