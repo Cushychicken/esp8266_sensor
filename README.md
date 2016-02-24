@@ -1,4 +1,4 @@
-# Fluvial - Simple Datalogging for NodeMCU
+# Simple Datalogging for NodeMCU
 
 This is a simple demonstration app for logging embedded data using 
 the ESP8266 wireless microcontroller and a companion server running 

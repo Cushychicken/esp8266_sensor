@@ -1,18 +1,11 @@
 -- Joins wifi address with SSID and PASSWORD 
---      Working - 12/30/2015
 function joinWifi(SSID, PASS)
-    wifi.setmode(wifi.STATIONAP)
-    wifi.sta.config(SSID,PASS)
---    cfg = {}
---    cfg.ssid="esp_serve"
---    cfg.pwd="development"
---    wifi.ap.setup(cfg)
+    wifi.setmode(wifi.STATION)
     ipaddr = wifi.sta.getip()
     return ipaddr
 end
 
 -- HTTP GET Request 
---      Working - 1/2/2016
 function requestGet(HOST, PORT)
     conn=net.createConnection(net.TCP, false) 
     conn:on("receive", function(conn, pl) payload=pl end)
@@ -25,8 +18,6 @@ function requestGet(HOST, PORT)
 end
 
 -- Reads ADC and generates post req text 
---      Working - 1/2/2016
---      Need to verify post req text formatting is right
 function adcValPostReq()
     data = { meas=tostring(adc.read(0)) }
     data = cjson.encode(data)
@@ -42,9 +33,6 @@ end
 
 
 -- HTTP POST Request
---      Working - 1/2/2016
---      Earlier missed communications unclear source
---      Not passing data value correctly - "None" on srvr
 function requestPost(HOST, PORT, data)
     conn=net.createConnection(net.TCP, 0)  
     conn:on("receive", function(conn, pl) payload=pl end) 
@@ -56,12 +44,16 @@ end
 -- Main body of the program
 
 if wifi.sta.getip() == nil then
-    joinWifi("Montucky", "KerivanReilly")
+    joinWifi("yourSSID", "yourPassword")
 end
+
+serverIP = "yourIP"
 
 tmr.alarm(1, 100, 1, function() tmr.wdclr() end)
 tmr.alarm(0, 1000, 1, function()
     payload = adcValPostReq()
-    requestPost("10.0.1.8", 5000, payload)
+    receipt = requestPost(serverIP, 5000, payload)
+	data = cjson.decode(receipt)
+	print(data)
 end)
 

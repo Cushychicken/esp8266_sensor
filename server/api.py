@@ -45,7 +45,9 @@ class DataList(Resource):
         if len(DATA) <= 20:
             return DATA
         else:
-            return DATA[-20:]
+            last = len(DATA)
+            tmp = [ DATA.get('data'+str(a)) for a in range((DATA-20), DATA) ]
+            return tmp
 
     def post(self):
         args = parser.parse_args()
